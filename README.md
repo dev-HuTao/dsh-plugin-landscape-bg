@@ -1,47 +1,126 @@
+---
+kind: plugin
+---
+
 # dsh-plugin-landscape-bg
 
-把一张风景画设为 dsh web 客户端的背景，并顺手修掉半透明化之后出现的 Windows 标题栏色差与圆角色楔。
+<div align="center">
 
-## 功能
+**给 dsh Web 客户端铺一张风景画当背景。**
 
-- **风景画背景**：在 `html::before` 上铺一张 `cover` 的画（固定定位，`z-index:-1`），桌面、侧栏、内容区都透出这张画。
-- **表面薄纱**：把 `--dsw-alias-bg-base` 改成半透明，让文字在画上仍清晰可读（浅色 / 深色各一档）。
-- **Windows 标题栏一致性**：把 `--dsw-specific-sidebar-fill` 在 `body` 上保持不透明（喂给原生 `setTitleBarOverlay` 探针），在 `#root` 内重新声明为半透明（页面壳层照旧透画）——两边各取所需；同时把页面自己绘制的 40px 标题栏带也刷成同一不透明色，让「系统按钮区」和「页面标题栏」读成一块，按钮图标不再发灰。
-- **圆角补齐**：Windows 下中心列左上角的 16px 圆角缺口只叠到一层薄纱，而侧栏叠了三层，缺口会偏亮成一道浅色楔。插件只在那 16×16 缺口里补刷两层同样的薄纱（用径向遮罩避开圆角本身），使圆角与侧栏同色。
+纯 CSS / token 注入，不改 dsh 本体；桌面、侧栏、内容区都透出同一幅画，
+Windows 标题栏与圆角缺口一并抹平。
+
+[![npm](https://img.shields.io/npm/v/dsh-plugin-landscape-bg.svg)](https://www.npmjs.com/package/dsh-plugin-landscape-bg)
+[![license](https://img.shields.io/badge/license-AGPL--3.0-green.svg)](./LICENSE)
+[![platform](https://img.shields.io/badge/platform-dsh%20web%20client-8a63d2.svg)](#兼容性)
+[![deps](https://img.shields.io/badge/runtime%20deps-none-brightgreen.svg)](./package.json)
+
+<p>
+  <img src="./assets/screenshot.png" alt="浅色主题：风景画背景铺满 dsh web 客户端" width="49%">
+  <img src="./assets/screenshot-dark.png" alt="深色主题：风景画背景铺满 dsh web 客户端" width="49%">
+</p>
+
+</div>
+
+## 这是什么
+
+`dsh-plugin-landscape-bg` 是一个 [dsh](https://www.npmjs.com/package/@deepseek-ai/dsh) **Web 客户端插件**。它在客户端启动时注入一段样式表与一层主题 token 覆盖：
+
+- 把一幅内嵌的 SVG 风景画（天空 / 三重山脊 / 雾气 / 倒影湖面 / 前景松林 / 飞鸟）铺成整页背景；
+- 把表面色改成半透明，让画透出来而文字仍然清晰；
+- 顺手修掉两处 Windows 上肉眼可见的瑕疵：原生标题栏按钮区与页面标题栏的色差、内容区左上角圆角处的浅色楔形缺口。
+
+没有任何后台服务、工具或事件注册，卸载后样式与 token 覆盖一并撤销。
+
+## 特性
+
+| 能力 | 说明 |
+| --- | --- |
+| 风景画背景 | `html::before` 固定铺一张 `cover` 的画（`z-index:-1`），`html::after` 叠一层顶部径向暗角，压住大面积亮色，避免影响前景文字。 |
+| 表面薄纱 | 把 `--dsw-alias-bg-base` 改成半透明（浅色 `0.55` / 深色 `0.64`）；壳层、基础表面、中心列各叠一层，使背景透出来而文字仍清晰。 |
+| 标题栏一致性 | `body` 上保留不透明 caption 色，供原生 `setTitleBarOverlay` 探针读取；`#root` 内改回半透明。页面自绘的 40px 标题栏带刷成同一色，系统按钮区与页面标题栏读成一块。 |
+| 圆角补齐 | Windows 下侧栏叠三层薄纱，中心列左上角 16px 圆角缺口只叠一层，缺口会偏亮成一道浅色楔。插件只在该缺口内补刷两层薄纱，用径向遮罩避开圆角本身。 |
+| 浅色 / 深色 | 两套取值都写在 token 层里，主题切换时即时生效。 |
+| 零依赖 | 效果全部集中在 `client.js`，背景图以 data URI 内嵌，不依赖资源服务路径。 |
+
+## 安装
+
+```bash
+# 从 npm 安装到指定 profile
+dsh plugin --profile <profile> add dsh-plugin-landscape-bg
+
+# 或直接从 git 宿主安装（本包是纯 JS，无需构建）
+dsh plugin --profile <profile> add github:horizonforge/dsh-plugin-landscape-bg
+
+# 或本地 checkout
+dsh plugin --profile <profile> add file:C:/work/dsh-plugin-landscape-bg
+```
+
+安装后重启 `dsh web`（或重新加载客户端）。也可以在 profile 配置里把 `dsh-plugin-landscape-bg` 加进 `dsh.profile.bundles`。
+
+卸载：
+
+```bash
+dsh plugin --profile <profile> remove dsh-plugin-landscape-bg
+```
+
+## 调参
+
+插件暴露的取值都集中在 `client.js` 顶部的几个常量里，改完重启客户端即可。
+
+| 想改什么 | 改哪里 |
+| --- | --- |
+| 背景画 | `client.js` 的 `PAINTING`（SVG 字符串；换成自己的 `<svg>` 或 URL 都行） |
+| 表面透画强度 | `SURFACES['--dsw-alias-bg-base']`（`light` / `dark` 两档 alpha） |
+| 标题栏颜色 | `CAPTION`（需与系统标题栏一致，且必须**不透明**） |
+| 壳层透画强度 | `stylesheet()` 里 `#root{--dsw-specific-sidebar-fill: …}` 两条 |
+| 想让画透进标题栏 | 删掉 `client.js` 中 `::before{background:var(--dsh-landscape-caption)}` 那条规则，代价是按钮区与左侧会有轻微色差 |
 
 ## 兼容性
 
-- 作为 **web client 插件** 注入到 `@deepseek-ai/dsh-client-ui-theme`，随 dsh 客户端加载。
+- 以 **web client 插件**形式注入 `@deepseek-ai/dsh-client-ui-theme`，随 dsh 客户端加载（`dsh.client.platform: web`，`immediately: true`）。
 - 浅色 / 深色主题均适配。
-- 标题栏带、圆角相关规则都包在 `[data-windows-titlebar]` 内，非 Windows（macOS / Web）不受影响；全屏（`data-fullscreen`）下标题栏带恢复透画。
-
+- 标题栏带与圆角规则都包在 `[data-windows-titlebar]` 内，macOS / 纯浏览器不受影响；全屏（`data-fullscreen`）下标题栏带恢复透画。
+- 圆角半径读 `--dsh-windows-content-radius`，标题栏高度读 `--dsh-windows-titlebar-height`，侧栏宽度读 `--dsh-windows-sidebar-width`，跟随 dsh 自身布局变量。
 
 ## 实现要点
 
 | 关注点 | 做法 |
 | --- | --- |
-| 背景图 | `html::before` 固定铺底，`html::after` 加顶部径向微暗角 |
-| 表面透画 | token 覆盖层改 `--dsw-alias-bg-base` 为半透明 |
-| 标题栏 | `body` 上保持不透明 caption 色，`#root` 内改回半透明 + 页内 `::before` 带用同色 |
+| 背景图 | `html::before` 固定铺底（`cover`），`html::after` 叠顶部径向暗角 |
+| 表面透画 | `ctx.theme.overrideTokens()` 写入 token 层，改 `--dsw-alias-bg-base` 为半透明 |
+| 标题栏 | `body` 保留不透明 caption 色给原生探针；`#root` 内改回半透明；页内 `::before` 带用同色 |
 | 圆角 | 仅缺口处补两层径向薄纱，半径读 `--dsh-windows-content-radius` |
 
-所有样式通过 CSS 注入，不修改 dsh 本体；卸载（plugin remove）后样式与 token 覆盖层一并撤销。
+样式通过 `<style data-plugin="dsh-plugin-landscape-bg">` 注入，生命周期挂在 `ctx.effect()` 上，卸载即回收。
 
 ## 文件结构
 
 ```
 dsh-plugin-landscape-bg/
 ├── assets/
-│   └── icon.svg          # 插件图标
-├── client.js             # 核心：背景、token 覆盖、标题栏/圆角修复
-├── cordis.patch.yml      # cordis 覆盖层声明（挂载点 / 注入目标）
-├── index.js              # 插件入口
-└── package.json          # 元信息（name / version / dsh.bundle / dsh.client）
+│   ├── icon.svg          # 插件图标
+│   ├── screenshot.png    # 效果截图（浅色）
+│   └── screenshot-dark.png    # 效果截图（深色）
+├── client.js             # 核心：背景、token 覆盖、标题栏 / 圆角修复
+├── cordis.patch.yml      # cordis 覆盖层声明（仅插入本插件自身一行）
+├── index.js              # Host 半侧入口（空实现，效果全在 Web 客户端）
+├── LICENSE               # AGPL-3.0
+├── package.json          # 元信息（name / version / dsh.bundle / dsh.client）
+└── README.md
 ```
+
+## Model Experience
+
+本插件只在 Web 客户端注入样式，不注册工具、服务、事件或模型可见文本，因此不影响模型输入、输出与 KV Cache。
 
 ## 已知限制
 
-- 标题栏「与原生按钮同色」和「背景透到标题栏里」二选一：当前选前者（顶上 40px 是纯色带）。若想让画透进标题栏，删除 `client.js` 里那条 `::before{background:var(--dsh-landscape-caption)}` 即可，代价是按钮区与左侧会有轻微色差。
-- 圆角补齐依赖「侧栏叠三层薄纱、缺口叠一层」的现状；若 dsh 改变叠层，差值会重新出现。
-- 背景图为插件内嵌资源（见 `client.js` 中的 data URI），替换图片需改该处。
+- 标题栏「与原生按钮同色」和「背景透到标题栏里」二选一：当前选前者（顶部 40px 是纯色带）。取舍见上文调参表。
+- 圆角补齐依赖「侧栏叠三层薄纱、缺口叠一层」的现状；若 dsh 改变叠层方式，差值会重新出现。
+- 背景图内嵌在 `client.js` 中，替换图片需要改该处并重启客户端。
 
+## License
+
+[AGPL-3.0](./LICENSE) © horizonforge
