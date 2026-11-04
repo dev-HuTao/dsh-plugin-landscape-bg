@@ -42,6 +42,7 @@ Windows 标题栏与圆角缺口一并抹平。
 | 标题栏一致性 | `body` 上保留不透明 caption 色，供原生 `setTitleBarOverlay` 探针读取；`#root` 内改回半透明。页面自绘的 40px 标题栏带刷成同一色，系统按钮区与页面标题栏读成一块。 |
 | 圆角补齐 | Windows 下侧栏叠三层薄纱，中心列左上角 16px 圆角缺口只叠一层，缺口会偏亮成一道浅色楔。插件只在该缺口内补刷两层薄纱，用径向遮罩避开圆角本身。 |
 | 浅色 / 深色 | 两套取值都写在 token 层里，主题切换时即时生效。 |
+| 本地化名称 | `locale/zh.json` 提供中文名「风景画背景」与中文描述；中文界面显示中文，其它语言环境保持原有英文名 `dsh-plugin-landscape-bg` 与 `package.json.description`。 |
 | 零依赖 | 效果全部集中在 `client.js`，背景图以 data URI 内嵌，不依赖资源服务路径。 |
 
 ## 安装
@@ -83,6 +84,18 @@ dsh plugin --profile <profile> remove dsh-plugin-landscape-bg
 - 浅色 / 深色主题均适配。
 - 标题栏带与圆角规则都包在 `[data-windows-titlebar]` 内，macOS / 纯浏览器不受影响；全屏（`data-fullscreen`）下标题栏带恢复透画。
 - 圆角半径读 `--dsh-windows-content-radius`，标题栏高度读 `--dsh-windows-titlebar-height`，侧栏宽度读 `--dsh-windows-sidebar-width`，跟随 dsh 自身布局变量。
+- 显示名的 locale 词典需要 dsh ≥ 0.2.0-rc.2。
+
+## 显示名
+
+显示文本由 Host 的 `readPluginMeta` 从 `locale/*.json` 读取，不激活插件。`en.json` 必须存在——它是 locale 目录的发现锚点——但刻意不带 `meta.title` / `meta.description`，让英文按回退链落到 `package.json.name` 与 `package.json.description`；`zh.json` 只覆盖中文。
+
+| 界面语言 | 名称 | 描述 |
+| --- | --- | --- |
+| 中文 | 风景画背景 | 给 dsh Web 客户端铺一张风景画当背景。 |
+| 英文或其它语言 | `dsh-plugin-landscape-bg` | `package.json.description` 的原文 |
+
+若想让英文界面也用一个人可读的名字（例如 `Landscape Background`），在 `locale/en.json` 的 `meta.title` 里写上即可。
 
 ## 实现要点
 
@@ -107,6 +120,9 @@ dsh-plugin-landscape-bg/
 ├── cordis.patch.yml      # cordis 覆盖层声明（仅插入本插件自身一行）
 ├── index.js              # Host 半侧入口（空实现，效果全在 Web 客户端）
 ├── LICENSE               # AGPL-3.0
+├── locale/
+│   ├── en.json           # 刻意留空：locale 目录的发现锚点，英文文本回落 package.json
+│   └── zh.json           # 中文名称与描述
 ├── package.json          # 元信息（name / version / dsh.bundle / dsh.client）
 └── README.md
 ```
