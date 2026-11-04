@@ -47,24 +47,10 @@ Windows 标题栏与圆角缺口一并抹平。
 
 ## 安装
 
-```bash
-# 从 npm 安装到指定 profile
-dsh plugin --profile <profile> add dsh-plugin-landscape-bg
+插件已发布到 npm，可在插件市场/插件添加界面直接输入包名添加：
 
-# 或本地 checkout：路径指向仓库内的包目录，不是仓库根
-dsh plugin --profile <profile> add file:C:/work/dsh-plugin-landscape-bg/dsh-plugin-landscape-bg
-```
-
-> 本仓库把 npm 包放在 `dsh-plugin-landscape-bg/` 子目录，仓库根没有 `package.json`。因此不能直接用 `dsh plugin --profile <profile> add github:horizonforge/dsh-plugin-landscape-bg`：git 安装会把仓库根当作包根，找不到 manifest 与 `dsh.bundle`。从 git 安装需要由插件市场的 Git 版本声明 `source.path` 指向该子目录，或改用 npm / `pnpm pack` 产出的 tarball。
-
-安装后重启 `dsh web`（或重新加载客户端）。也可以在 profile 配置里把 `dsh-plugin-landscape-bg` 加进 `dsh.profile.bundles`。
-
-卸载：
-
-```bash
-dsh plugin --profile <profile> remove dsh-plugin-landscape-bg
-```
-
+```text
+dsh-plugin-landscape-bg
 ## 调参
 
 插件暴露的取值都集中在 `dsh-plugin-landscape-bg/client.js` 顶部的几个常量里，改完重启客户端即可。
