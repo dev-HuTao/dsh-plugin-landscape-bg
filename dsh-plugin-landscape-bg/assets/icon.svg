@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <clipPath id="landscape-bg-frame">
+      <rect width="64" height="64" rx="16" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#landscape-bg-frame)">
+    <rect width="64" height="64" fill="#e2ecf3" />
+    <circle cx="44" cy="20" r="8" fill="#fff3d8" />
+    <path d="M0 46C8 38 14 38 21 46C27 52 30 52 36 46C44 38 50 38 58 46C61 48 62 48 64 47V64H0Z" fill="#a9c3d3" />
+    <path d="M0 56C9 49 15 49 24 56C30 60 34 60 41 56C49 50 56 50 64 56V64H0Z" fill="#7c9caf" />
+  </g>
+</svg>
