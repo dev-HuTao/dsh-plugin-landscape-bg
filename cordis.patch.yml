@@ -1,4 +1,0 @@
-# Only adds this plugin's own row; no official DSH component is replaced.
-- insert:
-    - id: landscape-bg
-      name: dsh-plugin-landscape-bg
