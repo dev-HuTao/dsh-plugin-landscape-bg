@@ -14,11 +14,11 @@ Windows 标题栏与圆角缺口一并抹平。
 [![npm](https://img.shields.io/npm/v/dsh-plugin-landscape-bg.svg)](https://www.npmjs.com/package/dsh-plugin-landscape-bg)
 [![license](https://img.shields.io/badge/license-AGPL--3.0-green.svg)](./LICENSE)
 [![platform](https://img.shields.io/badge/platform-dsh%20web%20client-8a63d2.svg)](#兼容性)
-[![deps](https://img.shields.io/badge/runtime%20deps-none-brightgreen.svg)](./package.json)
+[![deps](https://img.shields.io/badge/runtime%20deps-none-brightgreen.svg)](./dsh-plugin-landscape-bg/package.json)
 
 <p>
-  <img src="./assets/screenshot.png" alt="浅色主题：风景画背景铺满 dsh web 客户端" width="49%">
-  <img src="./assets/screenshot-dark.png" alt="深色主题：风景画背景铺满 dsh web 客户端" width="49%">
+  <img src="./dsh-plugin-landscape-bg/assets/screenshot.png" alt="浅色主题：风景画背景铺满 dsh web 客户端" width="49%">
+  <img src="./dsh-plugin-landscape-bg/assets/screenshot-dark.png" alt="深色主题：风景画背景铺满 dsh web 客户端" width="49%">
 </p>
 
 </div>
@@ -42,7 +42,7 @@ Windows 标题栏与圆角缺口一并抹平。
 | 标题栏一致性 | `body` 上保留不透明 caption 色，供原生 `setTitleBarOverlay` 探针读取；`#root` 内改回半透明。页面自绘的 40px 标题栏带刷成同一色，系统按钮区与页面标题栏读成一块。 |
 | 圆角补齐 | Windows 下侧栏叠三层薄纱，中心列左上角 16px 圆角缺口只叠一层，缺口会偏亮成一道浅色楔。插件只在该缺口内补刷两层薄纱，用径向遮罩避开圆角本身。 |
 | 浅色 / 深色 | 两套取值都写在 token 层里，主题切换时即时生效。 |
-| 本地化名称 | `locale/zh.json` 提供中文名「风景画背景」与中文描述；中文界面显示中文，其它语言环境保持原有英文名 `dsh-plugin-landscape-bg` 与 `package.json.description`。 |
+| 本地化名称 | `locale/zh.json` 提供中文名「清幕」与中文描述；中文界面显示中文，其它语言环境保持原有英文名 `dsh-plugin-landscape-bg` 与 `package.json.description`。 |
 | 零依赖 | 效果全部集中在 `client.js`，背景图以 data URI 内嵌，不依赖资源服务路径。 |
 
 ## 安装
@@ -51,12 +51,11 @@ Windows 标题栏与圆角缺口一并抹平。
 # 从 npm 安装到指定 profile
 dsh plugin --profile <profile> add dsh-plugin-landscape-bg
 
-# 或直接从 git 宿主安装（本包是纯 JS，无需构建）
-dsh plugin --profile <profile> add github:horizonforge/dsh-plugin-landscape-bg
-
-# 或本地 checkout
-dsh plugin --profile <profile> add file:C:/work/dsh-plugin-landscape-bg
+# 或本地 checkout：路径指向仓库内的包目录，不是仓库根
+dsh plugin --profile <profile> add file:C:/work/dsh-plugin-landscape-bg/dsh-plugin-landscape-bg
 ```
+
+> 本仓库把 npm 包放在 `dsh-plugin-landscape-bg/` 子目录，仓库根没有 `package.json`。因此不能直接用 `dsh plugin --profile <profile> add github:horizonforge/dsh-plugin-landscape-bg`：git 安装会把仓库根当作包根，找不到 manifest 与 `dsh.bundle`。从 git 安装需要由插件市场的 Git 版本声明 `source.path` 指向该子目录，或改用 npm / `pnpm pack` 产出的 tarball。
 
 安装后重启 `dsh web`（或重新加载客户端）。也可以在 profile 配置里把 `dsh-plugin-landscape-bg` 加进 `dsh.profile.bundles`。
 
@@ -68,7 +67,7 @@ dsh plugin --profile <profile> remove dsh-plugin-landscape-bg
 
 ## 调参
 
-插件暴露的取值都集中在 `client.js` 顶部的几个常量里，改完重启客户端即可。
+插件暴露的取值都集中在 `dsh-plugin-landscape-bg/client.js` 顶部的几个常量里，改完重启客户端即可。
 
 | 想改什么 | 改哪里 |
 | --- | --- |
@@ -92,7 +91,7 @@ dsh plugin --profile <profile> remove dsh-plugin-landscape-bg
 
 | 界面语言 | 名称 | 描述 |
 | --- | --- | --- |
-| 中文 | 风景画背景 | 给 dsh Web 客户端铺一张风景画当背景。 |
+| 中文 | 清幕 | 给DSH客户端铺一张风景画背景。 |
 | 英文或其它语言 | `dsh-plugin-landscape-bg` | `package.json.description` 的原文 |
 
 若想让英文界面也用一个人可读的名字（例如 `Landscape Background`），在 `locale/en.json` 的 `meta.title` 里写上即可。
@@ -111,20 +110,22 @@ dsh plugin --profile <profile> remove dsh-plugin-landscape-bg
 ## 文件结构
 
 ```
-dsh-plugin-landscape-bg/
-├── assets/
-│   ├── icon.svg          # 插件图标
-│   ├── screenshot.png    # 效果截图（浅色）
-│   └── screenshot-dark.png    # 效果截图（深色）
-├── client.js             # 核心：背景、token 覆盖、标题栏 / 圆角修复
-├── cordis.patch.yml      # cordis 覆盖层声明（仅插入本插件自身一行）
-├── index.js              # Host 半侧入口（空实现，效果全在 Web 客户端）
-├── LICENSE               # AGPL-3.0
-├── locale/
-│   ├── en.json           # 刻意留空：locale 目录的发现锚点，英文文本回落 package.json
-│   └── zh.json           # 中文名称与描述
-├── package.json          # 元信息（name / version / dsh.bundle / dsh.client）
-└── README.md
+<仓库根>/
+├── LICENSE                       # AGPL-3.0
+├── README.md                     # 仓库首页 / 包文档
+└── dsh-plugin-landscape-bg/      # npm 包根（package.json 在这里）
+    ├── .gitignore
+    ├── assets/
+    │   ├── icon.svg              # 插件图标
+    │   ├── screenshot.png        # 效果截图（浅色）
+    │   └── screenshot-dark.png   # 效果截图（深色）
+    ├── client.js                 # 核心：背景、token 覆盖、标题栏 / 圆角修复
+    ├── cordis.patch.yml          # cordis 覆盖层声明（仅插入本插件自身一行）
+    ├── index.js                  # Host 半侧入口（空实现，效果全在 Web 客户端）
+    ├── locale/
+    │   ├── en.json               # 刻意留空：locale 目录的发现锚点，英文文本回落 package.json
+    │   └── zh.json               # 中文名称与描述
+    └── package.json              # 元信息（name / version / dsh.bundle / dsh.client）
 ```
 
 ## Model Experience
