@@ -111,10 +111,10 @@ dsh plugin --profile <profile> remove dsh-plugin-landscape-bg
 
 ```
 <仓库根>/
+├── .gitignore                    # 整仓忽略规则（对各级子目录生效）
 ├── LICENSE                       # AGPL-3.0
 ├── README.md                     # 仓库首页 / 包文档
 └── dsh-plugin-landscape-bg/      # npm 包根（package.json 在这里）
-    ├── .gitignore
     ├── assets/
     │   ├── icon.svg              # 插件图标
     │   ├── screenshot.png        # 效果截图（浅色）
