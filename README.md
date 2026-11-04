@@ -51,6 +51,7 @@ Windows 标题栏与圆角缺口一并抹平。
 
 ```text
 dsh-plugin-landscape-bg
+```
 ## 调参
 
 插件暴露的取值都集中在 `dsh-plugin-landscape-bg/client.js` 顶部的几个常量里，改完重启客户端即可。
